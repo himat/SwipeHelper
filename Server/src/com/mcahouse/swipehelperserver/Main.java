@@ -19,7 +19,8 @@ public class Main extends Container implements ActionListener {
 	private static Robot robot;
 	private static JFrame frame;
 	private static ArrayList<JButton> buttons;
-	private static String[] buttonNames = {"numLock", "windows", "alt-tab", "collapse"};
+	private static String[] buttonNames = {"numLock", "windows", "alt-tab", "collapse",
+		"files", "print screen"};
 	private static JPanel buttonPanel;
 	
 	/**
@@ -87,7 +88,7 @@ public class Main extends Container implements ActionListener {
 	/**
 	 * Simulates hitting window key
 	 */
-	private static void callWindows(){
+	private static void windows(){
 		robot.keyPress(KeyEvent.VK_WINDOWS);
 		robot.keyRelease(KeyEvent.VK_WINDOWS); 
 		
@@ -96,7 +97,7 @@ public class Main extends Container implements ActionListener {
 	/**
 	 * Simulates hitting num lock
 	 */
-	private static void callNumLock(){
+	private static void numLock(){
 		robot.keyPress(KeyEvent.VK_NUM_LOCK);
 		robot.keyRelease(KeyEvent.VK_NUM_LOCK);
 	
@@ -105,7 +106,7 @@ public class Main extends Container implements ActionListener {
 	/**
 	 * Simulates hitting alt, then tab as if changing windows
 	 */
-	private static void test(){
+	private static void nextWindow(){
 		robot.keyPress(KeyEvent.VK_ALT);
 		robot.delay(500);
 		robot.keyPress(KeyEvent.VK_TAB);
@@ -128,6 +129,25 @@ public class Main extends Container implements ActionListener {
 	}
 	
 	/**
+	 * Win+E
+	 * Opens file explorer
+	 */
+	private static void fileExplorer()	{
+		robot.keyPress(KeyEvent.VK_WINDOWS);
+		robot.keyPress(KeyEvent.VK_E);
+		robot.keyRelease(KeyEvent.VK_E);
+		robot.keyRelease(KeyEvent.VK_WINDOWS);
+	}
+	
+	/**
+	 * Printscreen
+	 * Takes a picture of the screen and saves it in the clipboard
+	 */
+	private static void printScreen()	{
+		robot.keyPress(KeyEvent.VK_PRINTSCREEN);		
+	}
+	
+	/**
 	 * Returns button in array with specified text
 	 * @param text
 	 * @return button
@@ -144,16 +164,22 @@ public class Main extends Container implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {//CAUTION: make sure string matches exactly the button's text
 		if(e.getSource() == findButton("numLock"))	{
-			callNumLock();
+			numLock();
 		}
 		else if(e.getSource() == findButton("windows"))	{
-			callWindows();
+			windows();
 		}
 		else if(e.getSource() == findButton("alt-tab"))	{
-			test();
+			nextWindow();
 		}
 		else if(e.getSource() == findButton("collapse"))	{
 			collapse();
+		}
+		else if(e.getSource() == findButton("files"))	{
+			fileExplorer();
+		}
+		else if(e.getSource() == findButton("print screen"))	{
+			printScreen();
 		}
 	}
 }
