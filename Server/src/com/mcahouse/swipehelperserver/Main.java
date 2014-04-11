@@ -19,7 +19,7 @@ public class Main extends Container implements ActionListener {
 	private static Robot robot;
 	private static JFrame frame;
 	private static ArrayList<JButton> buttons;
-	private static String[] buttonNames = {"numLock", "windows", "alt-tab"};
+	private static String[] buttonNames = {"numLock", "windows", "alt-tab", "collapse"};
 	private static JPanel buttonPanel;
 	
 	/**
@@ -118,6 +118,16 @@ public class Main extends Container implements ActionListener {
 	}
 	
 	/**
+	 * Simulates hitting windows then D to collapse all windows
+	 */
+	private static void collapse()	{
+		robot.keyPress(KeyEvent.VK_WINDOWS);
+		robot.keyPress(KeyEvent.VK_D);
+		robot.keyRelease(KeyEvent.VK_D);
+		robot.keyRelease(KeyEvent.VK_WINDOWS);
+	}
+	
+	/**
 	 * Returns button in array with specified text
 	 * @param text
 	 * @return button
@@ -141,6 +151,9 @@ public class Main extends Container implements ActionListener {
 		}
 		else if(e.getSource() == findButton("alt-tab"))	{
 			test();
+		}
+		else if(e.getSource() == findButton("collapse"))	{
+			collapse();
 		}
 	}
 }
