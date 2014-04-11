@@ -3,5 +3,7 @@ bin/
 .settings/
 
 # Package Files #
+*.jar
+.classpath
 *.war
 *.ear
