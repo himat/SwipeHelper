@@ -12,6 +12,7 @@ public class Server implements Runnable {
 	private ServerSocket ss;
 	private DataOutputStream dout;//should be only 1...
 	private Socket s;
+	private String command;//current command received from phone
 	
 	
 	public Server(int port) throws IOException	{
@@ -46,6 +47,7 @@ public class Server implements Runnable {
 			while(true)	{
 				String input = din.readUTF();
 				System.out.println("GOT THIS: "+input);
+				command = input;
 				//do something with this input i.e. store it and give it to Main
 			}
 		} catch(EOFException ie)	{
@@ -55,5 +57,19 @@ public class Server implements Runnable {
 		} finally	{
 			removeConnection(s);
 		}
+	}
+
+	/**
+	 * @return the command
+	 */
+	public String getCommand() {
+		return command;
+	}
+
+	/**
+	 * @param command the command to set
+	 */
+	public void setCommand(String command) {
+		this.command = command;
 	}
 }

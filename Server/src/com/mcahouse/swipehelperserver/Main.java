@@ -17,8 +17,9 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 
-public class Main extends Container implements ActionListener {
+public class Main extends Container implements ActionListener, Runnable {
 
 	private static Robot robot;
 	private static JFrame frame;
@@ -28,6 +29,7 @@ public class Main extends Container implements ActionListener {
 	private static JPanel buttonPanel;
 	private static int port = 8085;//HARDCODED... change later?
 	private static Server server;
+	private static Boolean hitAlt;
 
 	/**
 	 * Constructor
@@ -50,6 +52,8 @@ public class Main extends Container implements ActionListener {
 		}
 		add(buttonPanel);// adds buttons on panel to container
 
+		hitAlt = false;
+		
 		try {
 			System.out.println("SERVERIP: "+ InetAddress.getLocalHost());
 		} catch (UnknownHostException e) {
@@ -66,6 +70,8 @@ public class Main extends Container implements ActionListener {
 			JOptionPane.showMessageDialog(frame, "Could not start Server","Error",  JOptionPane.ERROR_MESSAGE);
 		}
 		
+		(new Thread(this)).start();//start thread to listen to commands on phone
+
 		System.out.println("Init complete");
 	}
 
@@ -123,8 +129,34 @@ public class Main extends Container implements ActionListener {
 
 	}
 
+	//ALT-TAB sequence for changing windows.  note that user is in effect making the delay
+	/**
+	 * Simulates hitting alt
+	 */
+	private static void hitAlt()	{
+		robot.keyPress(KeyEvent.VK_ALT);
+		hitAlt = true;
+	}
+	
+	/**
+	 * Simulates releasing alt
+	 */
+	private static void releaseAlt()	{
+		robot.keyRelease(KeyEvent.VK_ALT);
+		hitAlt = false;
+	}
+
+	/**
+	 * Simulates hitting tab
+	 */
+	private static void hitTab()	{
+		robot.keyPress(KeyEvent.VK_TAB);
+		robot.keyRelease(KeyEvent.VK_TAB);
+	}
+	
 	/**
 	 * Simulates hitting alt, then tab as if changing windows
+	 * @deprecated
 	 */
 	private static void nextWindow() {
 		robot.keyPress(KeyEvent.VK_ALT);
@@ -196,6 +228,36 @@ public class Main extends Container implements ActionListener {
 			fileExplorer();
 		} else if (e.getSource() == findButton("print screen")) {
 			printScreen();
+		}
+	}
+
+	@Override
+	public void run() {
+		while(true)	{//check forever!
+			String command = server.getCommand();
+			System.out.println(hitAlt);
+			if(command != null)	{
+				if(command.contains("UP"))	{
+					windows();//open up windows menu
+				}
+				else if(command.contains("DOWN"))	{
+					collapse();//minimize all windows
+				}
+				else if(command.contains("RIGHT"))	{
+					//alt-tab, next window
+					if(!hitAlt)
+					{
+						hitAlt();
+						hitTab();
+					}
+					else
+						hitTab();
+				}
+				else if(command.contains("LEFT"))	{
+					releaseAlt();
+				}
+				server.setCommand(null);
+			}
 		}
 	}
 }
