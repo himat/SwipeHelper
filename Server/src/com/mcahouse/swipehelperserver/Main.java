@@ -3,7 +3,10 @@ package com.mcahouse.swipehelperserver;
 import java.awt.AWTException;
 import java.awt.Container;
 import java.awt.FlowLayout;
+import java.awt.PopupMenu;
 import java.awt.Robot;
+import java.awt.SystemTray;
+import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -12,8 +15,10 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -30,6 +35,7 @@ public class Main extends Container implements ActionListener, Runnable {
 	private static int port = 8085;//HARDCODED... change later?
 	private static Server server;
 	private static Boolean hitAlt;
+	private static JLabel ipLabel;//shows the ipaddress that user will input
 
 	/**
 	 * Constructor
@@ -42,6 +48,7 @@ public class Main extends Container implements ActionListener, Runnable {
 			System.err.println("Robot init failed:");
 			e.printStackTrace();
 		}
+		//TODO, final version of this get rid of button panel
 		buttonPanel = new JPanel();
 		buttons = new ArrayList<JButton>();
 		for (String bn : buttonNames)
@@ -53,6 +60,8 @@ public class Main extends Container implements ActionListener, Runnable {
 		add(buttonPanel);// adds buttons on panel to container
 
 		hitAlt = false;
+		
+		addToTray();
 		
 		try {
 			System.out.println("SERVERIP: "+ InetAddress.getLocalHost());
@@ -71,8 +80,39 @@ public class Main extends Container implements ActionListener, Runnable {
 		}
 		
 		(new Thread(this)).start();//start thread to listen to commands on phone
-
+		
+		try {
+			ipLabel = new JLabel(InetAddress.getLocalHost().toString());
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+		
+		add(ipLabel);
+		
 		System.out.println("Init complete");
+	}
+	
+	private static void addToTray()	{
+		//add to system tray
+		if(!SystemTray.isSupported())	{
+			System.out.println("SystemTray is not supported");
+			return;
+		}
+		final PopupMenu popup = new PopupMenu();
+		if(Main.class.getResource("SwipeIcon.gif") == null)	{
+			System.out.println("Cannot find tray icon image");
+		}
+		final TrayIcon trayIcon = new TrayIcon(new ImageIcon(Main.class.getResource("SwipeIcon.gif")).getImage());
+		final SystemTray tray = SystemTray.getSystemTray();
+		
+		//create menu items in pop up and add them to popup
+		
+		try	{
+			tray.add(trayIcon);
+		} catch(AWTException e)	{
+			System.out.println("Trayicon could not be added");
+			e.printStackTrace();
+		}
 	}
 
 	/**
