@@ -17,6 +17,8 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
+		Intent launchService = new Intent(getApplicationContext(), GestureOverlayService.class);
+		//startService(launchService); //Don't uncomment unless necessary
 		
 		Button gestureTestButton = (Button) findViewById(R.id.buttonGestureTest);
 		gestureTestButton.setOnClickListener(new OnClickListener() {
@@ -25,6 +27,7 @@ public class MainActivity extends Activity {
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 				Intent launchActivity = new Intent(getApplicationContext(), GestureTestActivity.class);
+				
 				startActivity(launchActivity);
 			}
 			

@@ -9,6 +9,7 @@
         android:targetSdkVersion="17" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
 
     <application
         android:allowBackup="true"
@@ -20,7 +21,6 @@
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -28,6 +28,9 @@
             android:name="com.mcahouse.swipehelper.GestureTestActivity"
             android:label="@string/title_activity_gesture_test" >
         </activity>
+        <service
+            android:name="com.mcahouse.swipehelper.GestureOverlayService" >
+        </service>
     </application>
 
 </manifest>
