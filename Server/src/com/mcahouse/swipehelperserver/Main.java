@@ -36,6 +36,7 @@ public class Main extends Container implements ActionListener, Runnable, KeyEven
 			"collapse", "files", "print screen" };
 	private static String[] keys = {"Enter", "Windows", "Alt", "Tab", "Up", "Down", "Left", "Right", "F4"};
 	private static Boolean windowsMenuUp;
+	private static Boolean altTabUp;
 	private static HashMap<String, Boolean> keyMap;//holds state of keys, true = pressed
 	private static JPanel buttonPanel;
 	private static int port = 8085;//HARDCODED... change later?
@@ -75,6 +76,8 @@ public class Main extends Container implements ActionListener, Runnable, KeyEven
 		/*listen on keystates in order to ensure that if user
 		does something on computer this program will know*/
 		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(this);
+		
+		altTabUp = false;//Alt tab menu is not active
 		
 		addToTray();//add icon to system tray for user's convenience
 		
@@ -290,6 +293,22 @@ public class Main extends Container implements ActionListener, Runnable, KeyEven
 		robot.delay(500);
 
 	}
+	
+	/**
+	 * Calls the alt+tab menu forth
+	 */
+	private static void switchWindow(){
+		
+		
+		try {
+			ProcessBuilder pb = new ProcessBuilder("cmd", "/c", "alt_tab.lnk");
+			Process process = pb.start();
+			altTabUp = true;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 	/**
 	 * Simulates hitting windows then D to collapse all windows
@@ -342,7 +361,7 @@ public class Main extends Container implements ActionListener, Runnable, KeyEven
 		} else if (e.getSource() == findButton("windows")) {
 			windows();
 		} else if (e.getSource() == findButton("alt-tab")) {
-			nextWindow();
+			switchWindow();
 		} else if (e.getSource() == findButton("collapse")) {
 			collapse();
 		} else if (e.getSource() == findButton("files")) {
@@ -358,26 +377,27 @@ public class Main extends Container implements ActionListener, Runnable, KeyEven
 			String command = server.getCommand();
 			//System.out.println(keyMap.get("Alt"));
 			System.out.println("WINDMENUUP: "+windowsMenuUp);
+
 			if(command != null)	{
 				if(command.contains("UP"))	{
-					if(windowsMenuUp)	{//if windows is pressed
-						hitUpArrowKey();
-					}
-					else	{
-						windows();//open up windows menu
-					}
+					altTabUp = false;
+					windows();//open up windows menu
+					
 				}
 				else if(command.contains("DOWN"))	{
-					if(windowsMenuUp)	{
+					/*if(windowsMenuUp)	{
 						hitDownArrowKey();
 					}
 					else if(keyMap.get("Alt"))//if alt is held, let go
 						releaseAlt();
 					else	{
 						collapse();//minimize all windows
-					}
+					}*/
+					collapse();
 				}
 				else if(command.contains("RIGHT"))	{
+					
+					/*
 					if(windowsMenuUp)	{//i.e. close the start menu
 						windows();
 					}
@@ -388,10 +408,18 @@ public class Main extends Container implements ActionListener, Runnable, KeyEven
 						hitTab();
 					}
 					else
+					{
+						System.out.println("tab hit");
 						hitTab();
+					}*/
+					if(!altTabUp)
+						switchWindow();
+					else
+						hitRightArrowKey();
+					
 				}
 				else if(command.contains("LEFT"))	{
-					if(windowsMenuUp)	{//i.e. close the start menu
+					/*if(windowsMenuUp)	{//i.e. close the start menu
 						windows();
 					}
 					if(!keyMap.get("Alt"))	{
@@ -399,16 +427,22 @@ public class Main extends Container implements ActionListener, Runnable, KeyEven
 						hitTab();
 					}
 					else
+						hitLeftArrowKey();*/
+					if(!altTabUp)
+						switchWindow();
+					else
 						hitLeftArrowKey();
 				}
 				else if(command.contains("SINGLE TAP"))	{
 					hitEnter();
 					windowsMenuUp = false;
+					altTabUp = false;
 				}
 				else if(command.contains("DOUBLE TAP"))	{
 					//close the current application...
 					hitAlt();
 					hitF4();
+
 					releaseAlt();
 				}
 				server.setCommand(null);
