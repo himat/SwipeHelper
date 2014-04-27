@@ -21,7 +21,7 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		
 		Intent launchService = new Intent(getApplicationContext(), GestureOverlayService.class);
-		//startService(launchService); //Don't uncomment unless necessary
+		startService(launchService); //Don't uncomment unless necessary
 		
 		Button gestureTestButton = (Button) findViewById(R.id.buttonGestureTest);
 		gestureTestButton.setOnClickListener(new OnClickListener() {
@@ -40,7 +40,7 @@ public class MainActivity extends Activity {
 					public void onClick(DialogInterface dialog, int which) {
 						ipAddress = ipInput.getText().toString();
 
-						startActivity(gestureActivity);
+						//startActivity(gestureActivity);
 					}
 				}
 				).show();
