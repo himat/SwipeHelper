@@ -3,6 +3,8 @@ package com.mcahouse.swipehelperserver;
 import java.awt.AWTException;
 import java.awt.Container;
 import java.awt.FlowLayout;
+import java.awt.KeyEventDispatcher;
+import java.awt.KeyboardFocusManager;
 import java.awt.PopupMenu;
 import java.awt.Robot;
 import java.awt.SystemTray;
@@ -14,6 +16,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -24,17 +27,19 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-public class Main extends Container implements ActionListener, Runnable {
+public class Main extends Container implements ActionListener, Runnable, KeyEventDispatcher {
 
 	private static Robot robot;
 	private static JFrame frame;
 	private static ArrayList<JButton> buttons;
 	private static String[] buttonNames = { "numLock", "windows", "alt-tab",
 			"collapse", "files", "print screen" };
+	private static String[] keys = {"Enter", "Windows", "Alt", "Tab", "Up", "Down", "Left", "Right", "F4"};
+	private static Boolean windowsMenuUp;
+	private static HashMap<String, Boolean> keyMap;//holds state of keys, true = pressed
 	private static JPanel buttonPanel;
 	private static int port = 8085;//HARDCODED... change later?
 	private static Server server;
-	private static Boolean hitAlt;
 	private static JLabel ipLabel;//shows the ipaddress that user will input
 	
 	private static JButton startButton;
@@ -60,10 +65,18 @@ public class Main extends Container implements ActionListener, Runnable {
 			}
 			
 		});
-
-		hitAlt = false;
 		
-		addToTray();
+		keyMap = new HashMap<String, Boolean>();
+		//init hashmap of keys
+		for(String key : keys)	{
+			keyMap.put(key, false);//note, put also used for updating keys too
+		}
+		windowsMenuUp = false;//note that windows menu pops up upon RELEASE of windows key!!!
+		/*listen on keystates in order to ensure that if user
+		does something on computer this program will know*/
+		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(this);
+		
+		addToTray();//add icon to system tray for user's convenience
 		
 		try {
 			System.out.println("SERVERIP: "+ InetAddress.getLocalHost());
@@ -170,16 +183,6 @@ public class Main extends Container implements ActionListener, Runnable {
 			}
 		});
 
-		/*
-		 * try {
-		 * 
-		 * callWindows(); callNumLock();
-		 * 
-		 * 
-		 * test(); System.out.println("hi"); } catch (AWTException e) { // TODO
-		 * Auto-generated catch block e.printStackTrace(); }
-		 */
-
 	}
 
 	/**
@@ -188,6 +191,7 @@ public class Main extends Container implements ActionListener, Runnable {
 	private static void windows() {
 		robot.keyPress(KeyEvent.VK_WINDOWS);
 		robot.keyRelease(KeyEvent.VK_WINDOWS);
+		windowsMenuUp = !windowsMenuUp;
 
 	}
 
@@ -206,7 +210,6 @@ public class Main extends Container implements ActionListener, Runnable {
 	 */
 	private static void hitAlt()	{
 		robot.keyPress(KeyEvent.VK_ALT);
-		hitAlt = true;
 	}
 	
 	/**
@@ -214,7 +217,6 @@ public class Main extends Container implements ActionListener, Runnable {
 	 */
 	private static void releaseAlt()	{
 		robot.keyRelease(KeyEvent.VK_ALT);
-		hitAlt = false;
 	}
 
 	/**
@@ -223,6 +225,54 @@ public class Main extends Container implements ActionListener, Runnable {
 	private static void hitTab()	{
 		robot.keyPress(KeyEvent.VK_TAB);
 		robot.keyRelease(KeyEvent.VK_TAB);
+	}
+	
+	/**
+	 * Simulates hitting left arrow key
+	 */
+	private static void hitLeftArrowKey()	{
+		robot.keyPress(KeyEvent.VK_LEFT);
+		robot.keyRelease(KeyEvent.VK_LEFT);
+	}
+	
+	/**
+	 * Simulates hitting right arrow key
+	 */
+	private static void hitRightArrowKey()	{
+		robot.keyPress(KeyEvent.VK_RIGHT);
+		robot.keyRelease(KeyEvent.VK_RIGHT);
+	}
+	
+	/**
+	 * Simulates hitting up arrow key
+	 */
+	private static void hitUpArrowKey()	{
+		robot.keyPress(KeyEvent.VK_UP);
+		robot.keyRelease(KeyEvent.VK_UP);
+	}
+	
+	/**
+	 * Simulates hitting down arrow key
+	 */
+	private static void hitDownArrowKey()	{
+		robot.keyPress(KeyEvent.VK_DOWN);
+		robot.keyRelease(KeyEvent.VK_DOWN);
+	}
+	
+	/**
+	 * Simulates hitting enter key
+	 */
+	private static void hitEnter()	{
+		robot.keyPress(KeyEvent.VK_ENTER);
+		robot.keyRelease(KeyEvent.VK_ENTER);
+	}
+	
+	/**
+	 * Simulates hitting F4, as in alt-f4 to close applications
+	 */
+	private static void hitF4()	{
+		robot.keyPress(KeyEvent.VK_F4);
+		robot.keyRelease(KeyEvent.VK_F4);
 	}
 	
 	/**
@@ -306,17 +356,33 @@ public class Main extends Container implements ActionListener, Runnable {
 	public void run() {
 		while(true)	{//check forever!
 			String command = server.getCommand();
-			System.out.println(hitAlt);
+			//System.out.println(keyMap.get("Alt"));
+			System.out.println("WINDMENUUP: "+windowsMenuUp);
 			if(command != null)	{
 				if(command.contains("UP"))	{
-					windows();//open up windows menu
+					if(windowsMenuUp)	{//if windows is pressed
+						hitUpArrowKey();
+					}
+					else	{
+						windows();//open up windows menu
+					}
 				}
 				else if(command.contains("DOWN"))	{
-					collapse();//minimize all windows
+					if(windowsMenuUp)	{
+						hitDownArrowKey();
+					}
+					else if(keyMap.get("Alt"))//if alt is held, let go
+						releaseAlt();
+					else	{
+						collapse();//minimize all windows
+					}
 				}
 				else if(command.contains("RIGHT"))	{
+					if(windowsMenuUp)	{//i.e. close the start menu
+						windows();
+					}
 					//alt-tab, next window
-					if(!hitAlt)
+					else if(!keyMap.get("Alt"))
 					{
 						hitAlt();
 						hitTab();
@@ -325,10 +391,85 @@ public class Main extends Container implements ActionListener, Runnable {
 						hitTab();
 				}
 				else if(command.contains("LEFT"))	{
+					if(windowsMenuUp)	{//i.e. close the start menu
+						windows();
+					}
+					if(!keyMap.get("Alt"))	{
+						hitAlt();
+						hitTab();
+					}
+					else
+						hitLeftArrowKey();
+				}
+				else if(command.contains("SINGLE TAP"))	{
+					hitEnter();
+					windowsMenuUp = false;
+				}
+				else if(command.contains("DOUBLE TAP"))	{
+					//close the current application...
+					hitAlt();
+					hitF4();
 					releaseAlt();
 				}
 				server.setCommand(null);
 			}
 		}
+	}
+
+	/**
+	 * Listens on key states for: Enter, Windows, Alt, Tab, Up, Down, Left, Right
+	 * @param e
+	 * @return
+	 */
+	@Override
+	public boolean dispatchKeyEvent(KeyEvent e) {
+		synchronized(Main.class)	{
+			switch(e.getID())	{
+			case KeyEvent.KEY_PRESSED:
+				switch(e.getKeyCode())	{
+				case KeyEvent.VK_ENTER:
+					keyMap.put("Enter", true);
+				case KeyEvent.VK_WINDOWS:
+					keyMap.put("Windows", true);
+				case KeyEvent.VK_ALT:
+					keyMap.put("Alt", true);
+				case KeyEvent.VK_TAB:
+					keyMap.put("Tab", true);
+				case KeyEvent.VK_UP:
+					keyMap.put("Up", true);
+				case KeyEvent.VK_DOWN:
+					keyMap.put("Down", true);
+				case KeyEvent.VK_LEFT:
+					keyMap.put("Left", true);
+				case KeyEvent.VK_RIGHT:
+					keyMap.put("Right", true);
+				case KeyEvent.VK_F4:
+					keyMap.put("F4", true);
+				}
+				break;
+			case KeyEvent.KEY_RELEASED:
+				switch(e.getKeyCode())	{
+				case KeyEvent.VK_ENTER:
+					keyMap.put("Enter", false);
+				case KeyEvent.VK_WINDOWS:
+					keyMap.put("Windows", false);
+				case KeyEvent.VK_ALT:
+					keyMap.put("Alt", false);
+				case KeyEvent.VK_TAB:
+					keyMap.put("Tab", false);
+				case KeyEvent.VK_UP:
+					keyMap.put("Up", false);
+				case KeyEvent.VK_DOWN:
+					keyMap.put("Down", false);
+				case KeyEvent.VK_LEFT:
+					keyMap.put("Left", false);
+				case KeyEvent.VK_RIGHT:
+					keyMap.put("Right", false);
+				case KeyEvent.VK_F4:
+					keyMap.put("F4", true);
+				}
+			}
+		}
+		return false;
 	}
 }
