@@ -52,5 +52,14 @@ public class Client implements Runnable {
 		//not sure if the client needs to receive anything from server
 	}
 	
+	public void closeConnection(){
+		try {
+			socket.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 }
 

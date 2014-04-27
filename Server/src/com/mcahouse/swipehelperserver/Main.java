@@ -36,7 +36,8 @@ public class Main extends Container implements ActionListener, Runnable {
 	private static Server server;
 	private static Boolean hitAlt;
 	private static JLabel ipLabel;//shows the ipaddress that user will input
-
+	
+	private static JButton startButton;
 	/**
 	 * Constructor
 	 */
@@ -48,16 +49,17 @@ public class Main extends Container implements ActionListener, Runnable {
 			System.err.println("Robot init failed:");
 			e.printStackTrace();
 		}
-		//TODO, final version of this get rid of button panel
-		buttonPanel = new JPanel();
-		buttons = new ArrayList<JButton>();
-		for (String bn : buttonNames)
-			buttons.add(new JButton(bn));// creates array of buttons
-		for (JButton jb : buttons) {
-			jb.addActionListener(this);
-			add(jb);// adds buttons to jpanel
-		}
-		add(buttonPanel);// adds buttons on panel to container
+		
+		startButton = new JButton("Start");
+		
+		startButton.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				displayActionsScreen();				
+			}
+			
+		});
 
 		hitAlt = false;
 		
@@ -71,6 +73,24 @@ public class Main extends Container implements ActionListener, Runnable {
 		
 		//note, putting this here causes the program to wait until there is a connection before anything happens!
 		//perhaps place in a thread?
+		
+		try {
+			ipLabel = new JLabel("Enter the numbers into your device: " + InetAddress.getLocalHost().toString().split("/")[1]);
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+		
+		add(ipLabel);
+		add(startButton);
+		
+		
+		System.out.println("Init complete");
+		
+	
+	}
+	
+	private void displayActionsScreen(){
+		this.remove(startButton);
 		try {
 			server = new Server(port);
 		} catch (IOException e) {
@@ -82,14 +102,24 @@ public class Main extends Container implements ActionListener, Runnable {
 		(new Thread(this)).start();//start thread to listen to commands on phone
 		
 		try {
-			ipLabel = new JLabel(InetAddress.getLocalHost().toString());
+			ipLabel.setText(InetAddress.getLocalHost().toString());
 		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		add(ipLabel);
-		
-		System.out.println("Init complete");
+		//TODO, final version of this get rid of button panel
+		buttonPanel = new JPanel();
+		buttons = new ArrayList<JButton>();
+		for (String bn : buttonNames)
+			buttons.add(new JButton(bn));// creates array of buttons
+		for (JButton jb : buttons) {
+			jb.addActionListener(this);
+			add(jb);// adds buttons to jpanel
+		}
+		add(buttonPanel);// adds buttons on panel to container
+		this.revalidate();
+		this.repaint();
 	}
 	
 	private static void addToTray()	{
@@ -124,6 +154,7 @@ public class Main extends Container implements ActionListener, Runnable {
 		frame.add(new Main());
 		frame.pack();
 		frame.setVisible(true);
+		
 	}
 
 	/**

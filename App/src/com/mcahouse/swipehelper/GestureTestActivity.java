@@ -32,7 +32,7 @@ public class GestureTestActivity extends Activity implements
 		    @Override
 		    public void run() {
 		        try {
-					String host = "192.168.0.106";//hard coded to Roland's computer
+					String host = MainActivity.ipAddress;//"192.168.4.103";//hard coded to Roland's computer
 					//TODO figure out how to find the host computer (otherwise run the server on the web or something)
 					int port = 8085;//HARDCODED...change later?
 		        	client = new Client(host, port);
@@ -146,6 +146,13 @@ public class GestureTestActivity extends Activity implements
 		// TODO Auto-generated method stub
 		updateText("SINGLE TAP");
 		return true;
+	}
+	
+
+	
+	@Override
+	public void onStop(){
+		client.closeConnection();
 	}
 
 }
