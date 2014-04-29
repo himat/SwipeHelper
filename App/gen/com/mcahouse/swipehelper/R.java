@@ -23,23 +23,22 @@ public final class R {
     public static final class drawable {
         public static final int ic_launcher=0x7f020000;
         public static final int overlay_back=0x7f020001;
+        public static final int swipe_banner=0x7f020002;
     }
     public static final class id {
-        public static final int action_settings=0x7f080008;
-        public static final int buttonGestureTest=0x7f080002;
-        public static final int gestureImageView=0x7f080007;
-        public static final int ip_box=0x7f080003;
-        public static final int ip_ok=0x7f080004;
-        public static final int overlayCloseButton=0x7f080006;
-        public static final int overlayImageView=0x7f080005;
-        public static final int textView1=0x7f080001;
+        public static final int action_settings=0x7f080007;
+        public static final int gestureImageView=0x7f080006;
+        public static final int imageView1=0x7f080001;
+        public static final int ip_box=0x7f080002;
+        public static final int overlayCloseButton=0x7f080005;
+        public static final int overlayImageView=0x7f080004;
+        public static final int startGestureActivity=0x7f080003;
         public static final int textviewOutput=0x7f080000;
     }
     public static final class layout {
         public static final int activity_gesture_test=0x7f030000;
         public static final int activity_main=0x7f030001;
-        public static final int dialog_ip=0x7f030002;
-        public static final int service_gesture_overlay=0x7f030003;
+        public static final int service_gesture_overlay=0x7f030002;
     }
     public static final class menu {
         public static final int gesture_test=0x7f070000;

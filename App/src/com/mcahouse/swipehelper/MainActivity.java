@@ -21,28 +21,19 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-		Button gestureTestButton = (Button) findViewById(R.id.buttonGestureTest);
+		Button gestureTestButton = (Button) findViewById(R.id.startGestureActivity);
 		gestureTestButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				final EditText ipInput = new EditText(MainActivity.this);
-				new AlertDialog.Builder(MainActivity.this).setTitle("Enter IP")
-				.setMessage("Enter computer IP")
-				.setView(ipInput)
-				.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-					
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						ipAddress = ipInput.getText().toString();
-						Intent gestureActivity = new Intent(getApplicationContext(), GestureTestActivity.class);
-						Intent launchService = new Intent(getApplicationContext(), GestureOverlayService.class);
-						//startService(launchService);
-						startActivity(gestureActivity);
-					}
-				}
-				).show();
+				
+				EditText ipInput = (EditText) findViewById(R.id.ip_box);
+				ipAddress = ipInput.getText().toString();
+				Intent gestureActivity = new Intent(getApplicationContext(), GestureTestActivity.class);
+				Intent launchService = new Intent(getApplicationContext(), GestureOverlayService.class);
+				//startService(launchService);
+				startActivity(gestureActivity);
+				
 			}
 			
 		});
