@@ -31,8 +31,8 @@ public class MainActivity extends Activity {
 				ipAddress = ipInput.getText().toString();
 				Intent gestureActivity = new Intent(getApplicationContext(), GestureTestActivity.class);
 				Intent launchService = new Intent(getApplicationContext(), GestureOverlayService.class);
-				//startService(launchService);
-				startActivity(gestureActivity);
+				startService(launchService);
+				//startActivity(gestureActivity);
 				
 			}
 			
