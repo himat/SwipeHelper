@@ -13,9 +13,12 @@ public class Server implements Runnable {
 	private DataOutputStream dout;//should be only 1...
 	private Socket s;
 	private String command;//current command received from phone
+	private Boolean connected;
+	private Thread mainThread;
 	
 	
 	public Server(int port) throws IOException	{
+		connected = false;
 		listen(port);//wait for phone connection
 	}
 	
@@ -23,14 +26,26 @@ public class Server implements Runnable {
 		ss = new ServerSocket(port);//TODO make it find it's own ports then generate code to put in phone to find it's own port
 		System.out.println("Listening on " + ss);
 		//do we need a loop if it's only one connection?
-		s = ss.accept();
-		System.out.println("Connection from "+s);
-		DataOutputStream dout = new DataOutputStream(s.getOutputStream());
-		(new Thread(this)).start();
+		mainThread = new Thread(this);
+		Thread wait = new Thread()	{
+			public void run()	{
+				try {
+					s = ss.accept();
+					System.out.println("Connection from "+s);
+					DataOutputStream dout = new DataOutputStream(s.getOutputStream());
+					connected = true;
+					mainThread.start();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		};
+		wait.start();
 	}
 	
 	public void removeConnection(Socket s)	{
 		System.out.println("Removing connection to "+s);
+		connected = false;
 		try	{
 			s.close();
 		} catch(IOException ie)	{
@@ -48,6 +63,8 @@ public class Server implements Runnable {
 				String input = din.readUTF();
 				System.out.println("GOT THIS: "+input);
 				command = input;
+				if(input.contains("EXIT"))
+					break;//TODO code in phone to put a command called exit when it exits
 				//do something with this input i.e. store it and give it to Main
 			}
 		} catch(EOFException ie)	{
@@ -71,5 +88,12 @@ public class Server implements Runnable {
 	 */
 	public void setCommand(String command) {
 		this.command = command;
+	}
+
+	/**
+	 * @return true if connected
+	 */
+	public Boolean isConnected() {
+		return connected;
 	}
 }

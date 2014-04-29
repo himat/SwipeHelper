@@ -5,6 +5,8 @@ import java.awt.Container;
 import java.awt.FlowLayout;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
+import java.awt.Menu;
+import java.awt.MenuItem;
 import java.awt.PopupMenu;
 import java.awt.Robot;
 import java.awt.SystemTray;
@@ -12,6 +14,8 @@ import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -43,7 +47,15 @@ public class Main extends Container implements ActionListener, Runnable, KeyEven
 	private static Server server;
 	private static JLabel ipLabel;//shows the ipaddress that user will input
 	
+	private Boolean connected;
+	private Thread mainThread;
+	
 	private static JButton startButton;
+	private static TrayIcon trayIcon;
+	private static SystemTray tray;
+	private static PopupMenu popup;
+	private static MenuItem settings;
+	private static MenuItem close;
 	/**
 	 * Constructor
 	 */
@@ -56,7 +68,9 @@ public class Main extends Container implements ActionListener, Runnable, KeyEven
 			e.printStackTrace();
 		}
 		
-		startButton = new JButton("Start");
+		connected = false;
+		
+		/*startButton = new JButton("Start");
 		
 		startButton.addActionListener(new ActionListener(){
 
@@ -65,7 +79,7 @@ public class Main extends Container implements ActionListener, Runnable, KeyEven
 				displayActionsScreen();				
 			}
 			
-		});
+		});*/
 		
 		keyMap = new HashMap<String, Boolean>();
 		//init hashmap of keys
@@ -80,6 +94,13 @@ public class Main extends Container implements ActionListener, Runnable, KeyEven
 		altTabUp = false;//Alt tab menu is not active
 		
 		addToTray();//add icon to system tray for user's convenience
+		try {
+			ipLabel = new JLabel("Enter the numbers into your device: " + InetAddress.getLocalHost().toString().split("/")[1]);
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+
+		displayActionsScreen();//i.e. wait and get response from phone
 		
 		try {
 			System.out.println("SERVERIP: "+ InetAddress.getLocalHost());
@@ -87,18 +108,13 @@ public class Main extends Container implements ActionListener, Runnable, KeyEven
 			e.printStackTrace();
 		}
 		
-		//note, putting this here causes the program to wait until there is a connection before anything happens!
-		//perhaps place in a thread?
-		
-		try {
-			ipLabel = new JLabel("Enter the numbers into your device: " + InetAddress.getLocalHost().toString().split("/")[1]);
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		}
 		
 		add(ipLabel);
-		add(startButton);
+		//add(startButton);
 		
+		if(connected)	{
+			trayIcon.setToolTip("Connected");
+		}
 		
 		System.out.println("Init complete");
 		
@@ -106,7 +122,7 @@ public class Main extends Container implements ActionListener, Runnable, KeyEven
 	}
 	
 	private void displayActionsScreen(){
-		this.remove(startButton);
+		//this.remove(startButton);
 		try {
 			server = new Server(port);
 		} catch (IOException e) {
@@ -114,44 +130,65 @@ public class Main extends Container implements ActionListener, Runnable, KeyEven
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(frame, "Could not start Server","Error",  JOptionPane.ERROR_MESSAGE);
 		}
-		
-		(new Thread(this)).start();//start thread to listen to commands on phone
-		
-		try {
-			ipLabel.setText(InetAddress.getLocalHost().toString());
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		//TODO, final version of this get rid of button panel
-		buttonPanel = new JPanel();
-		buttons = new ArrayList<JButton>();
-		for (String bn : buttonNames)
-			buttons.add(new JButton(bn));// creates array of buttons
-		for (JButton jb : buttons) {
-			jb.addActionListener(this);
-			add(jb);// adds buttons to jpanel
-		}
-		add(buttonPanel);// adds buttons on panel to container
-		this.revalidate();
-		this.repaint();
+		mainThread = new Thread(this);
+		Thread wait = new Thread()	{
+			public void run()	{
+				while(!server.isConnected())	{
+					System.out.println("waiting");
+				}//loop if not connected yet
+				connected = true;
+				mainThread.start();//start thread to listen to commands on phone
+				
+				try {
+					ipLabel.setText(InetAddress.getLocalHost().toString());
+				} catch (UnknownHostException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				/*//TODO, final version of this get rid of button panel
+				buttonPanel = new JPanel();
+				buttons = new ArrayList<JButton>();
+				for (String bn : buttonNames)
+					buttons.add(new JButton(bn));// creates array of buttons
+				for (JButton jb : buttons) {
+					jb.addActionListener(this);
+					add(jb);// adds buttons to jpanel
+				}
+				add(buttonPanel);// adds buttons on panel to container*/
+				frame.revalidate();
+				frame.repaint();
+			}
+		};
+		wait.start();
 	}
 	
-	private static void addToTray()	{
+	private void addToTray()	{
 		//add to system tray
 		if(!SystemTray.isSupported())	{
 			System.out.println("SystemTray is not supported");
 			return;
 		}
-		final PopupMenu popup = new PopupMenu();
 		if(Main.class.getResource("SwipeIcon.gif") == null)	{
 			System.out.println("Cannot find tray icon image");
 		}
-		final TrayIcon trayIcon = new TrayIcon(new ImageIcon(Main.class.getResource("SwipeIcon.gif")).getImage());
-		final SystemTray tray = SystemTray.getSystemTray();
+		trayIcon = new TrayIcon(new ImageIcon(Main.class.getResource("SwipeIcon.gif")).getImage());
+		tray = SystemTray.getSystemTray();
+		try {
+			trayIcon.setToolTip("Enter the numbers into your device: " + InetAddress.getLocalHost().toString().split("/")[1] + " to connect");
+		} catch (UnknownHostException e1) {
+			e1.printStackTrace();
+		}
 		
 		//create menu items in pop up and add them to popup
+		popup = new PopupMenu();
+		settings = new MenuItem("Settings");
+		settings.addActionListener(this);
+		close = new MenuItem("Close");
+		close.addActionListener(this);
+		popup.add(settings);
+		popup.add(close);
+		trayIcon.setPopupMenu(popup);
 		
 		try	{
 			tray.add(trayIcon);
@@ -169,8 +206,14 @@ public class Main extends Container implements ActionListener, Runnable, KeyEven
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.add(new Main());
 		frame.pack();
-		frame.setVisible(true);
-		
+		//frame.setVisible(true);
+		frame.setIconImage(new ImageIcon(Main.class.getResource("SwipeIcon.gif")).getImage());
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		frame.addWindowListener(new WindowAdapter()	{
+			public void windowClosing(WindowEvent we)	{
+				frame.setVisible(false);
+			}
+		});
 	}
 
 	/**
@@ -356,7 +399,14 @@ public class Main extends Container implements ActionListener, Runnable, KeyEven
 	public void actionPerformed(ActionEvent e) {// CAUTION: make sure string
 												// matches exactly the button's
 												// text
-		if (e.getSource() == findButton("numLock")) {
+		
+		if(e.getSource() == settings)	{
+			frame.setVisible(true);
+		} 
+		else if(e.getSource() == close)	{
+			System.exit(0);
+		}
+		/*else if (e.getSource() == findButton("numLock")) {
 			numLock();
 		} else if (e.getSource() == findButton("windows")) {
 			windows();
@@ -368,7 +418,7 @@ public class Main extends Container implements ActionListener, Runnable, KeyEven
 			fileExplorer();
 		} else if (e.getSource() == findButton("print screen")) {
 			printScreen();
-		}
+		}*/
 	}
 
 	@Override
