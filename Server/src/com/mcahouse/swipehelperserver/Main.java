@@ -112,10 +112,6 @@ public class Main extends Container implements ActionListener, Runnable, KeyEven
 		add(ipLabel);
 		//add(startButton);
 		
-		if(connected)	{
-			trayIcon.setToolTip("Connected");
-		}
-		
 		System.out.println("Init complete");
 		
 	
@@ -179,7 +175,6 @@ public class Main extends Container implements ActionListener, Runnable, KeyEven
 		} catch (UnknownHostException e1) {
 			e1.printStackTrace();
 		}
-		
 		//create menu items in pop up and add them to popup
 		popup = new PopupMenu();
 		settings = new MenuItem("Settings");
@@ -206,7 +201,7 @@ public class Main extends Container implements ActionListener, Runnable, KeyEven
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.add(new Main());
 		frame.pack();
-		//frame.setVisible(true);
+		frame.setVisible(true);
 		frame.setIconImage(new ImageIcon(Main.class.getResource("SwipeIcon.gif")).getImage());
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.addWindowListener(new WindowAdapter()	{
@@ -427,6 +422,18 @@ public class Main extends Container implements ActionListener, Runnable, KeyEven
 			String command = server.getCommand();
 			//System.out.println(keyMap.get("Alt"));
 			System.out.println("WINDMENUUP: "+windowsMenuUp);
+			
+			if(connected)	{
+				trayIcon.setToolTip("Connected");
+			}
+			else	{
+				System.out.println("disconnected");
+				try {
+					trayIcon.setToolTip("Enter the numbers into your device: " + InetAddress.getLocalHost().toString().split("/")[1] + " to connect");
+				} catch (UnknownHostException e) {
+					e.printStackTrace();
+				}
+			}
 
 			if(command != null)	{
 				if(command.contains("UP"))	{
