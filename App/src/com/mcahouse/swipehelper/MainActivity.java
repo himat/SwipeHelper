@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -20,16 +21,12 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-		Intent launchService = new Intent(getApplicationContext(), GestureOverlayService.class);
-		startService(launchService); //Don't uncomment unless necessary
-		
 		Button gestureTestButton = (Button) findViewById(R.id.buttonGestureTest);
 		gestureTestButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				final Intent gestureActivity = new Intent(getApplicationContext(), GestureTestActivity.class);
 				final EditText ipInput = new EditText(MainActivity.this);
 				new AlertDialog.Builder(MainActivity.this).setTitle("Enter IP")
 				.setMessage("Enter computer IP")
@@ -39,8 +36,9 @@ public class MainActivity extends Activity {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						ipAddress = ipInput.getText().toString();
-
-						//startActivity(gestureActivity);
+						
+						Intent launchService = new Intent(getApplicationContext(), GestureOverlayService.class);
+						startService(launchService);
 					}
 				}
 				).show();

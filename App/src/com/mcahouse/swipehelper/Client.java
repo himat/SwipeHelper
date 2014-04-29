@@ -41,7 +41,6 @@ public class Client implements Runnable {
 	public void writeToPC(String str)	{
 		try	{
 			dout.writeUTF(str);
-			
 		} catch(IOException ie)	{
 			ie.printStackTrace();
 		}

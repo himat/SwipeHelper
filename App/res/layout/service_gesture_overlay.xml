@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="200dp"
-    android:layout_height="200dp"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:background="#CCCCCC" >
 
     <ImageView
@@ -10,6 +10,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
+        android:contentDescription="Image to toggle GUI"
         android:src="@drawable/ic_launcher" />
 
     <Button
@@ -19,5 +20,14 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:text="Close" />
+
+    <com.mcahouse.swipehelper.GestureImageView
+        android:id="@+id/gestureImageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/overlayImageView"
+        android:layout_centerHorizontal="true"
+        android:padding="5dp"
+        android:src="@drawable/overlay_back" />
 
 </RelativeLayout>

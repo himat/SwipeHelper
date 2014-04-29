@@ -1,9 +1,12 @@
 package com.mcahouse.swipehelper;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Canvas;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -25,7 +28,11 @@ public class GestureOverlayService extends Service {
 	
 	private ImageView expandedImageView;
 	private Button expandedCloseButton;
-
+	
+	private GestureImageView gestureImageView;
+	
+	public Client client;
+	
 	@Override
 	public IBinder onBind(Intent intent) {
 		// TODO Auto-generated method stub
@@ -37,9 +44,6 @@ public class GestureOverlayService extends Service {
 		super.onCreate();
 
 		windowManager = (WindowManager)getSystemService(WINDOW_SERVICE);
-
-		//chatHead = new ImageView(this);
-		//chatHead.setImageResource(R.drawable.ic_launcher);
 		
 		expandedView = (RelativeLayout) ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE))
 				.inflate(R.layout.service_gesture_overlay, null);
@@ -51,7 +55,6 @@ public class GestureOverlayService extends Service {
 		minimizedView.setImageResource(R.drawable.ic_launcher);
 		
 		expandedCloseButton.setOnClickListener(new View.OnClickListener() {
-			
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
@@ -59,28 +62,17 @@ public class GestureOverlayService extends Service {
 			}
 		});
 		
-		expandedImageView.setOnTouchListener(new View.OnTouchListener() {
-			private int initialX;
-			private int initialY;
-			private float initialTouchX;
-			private float initialTouchY;
+		expandedImageView.setOnTouchListener(new View.OnTouchListener() {		
+			private long downTime;
 
 			@Override public boolean onTouch(View v, MotionEvent event) {
 				switch (event.getAction()) {
 				case MotionEvent.ACTION_DOWN:
-					initialX = params.x;
-					initialY = params.y;
-					initialTouchX = event.getRawX();
-					initialTouchY = event.getRawY();
+					downTime = System.currentTimeMillis();
 					return true;
 				case MotionEvent.ACTION_UP:
 					windowManager.removeView(expandedView);
-					windowManager.addView(minimizedView, params);
-					return true;
-				case MotionEvent.ACTION_MOVE:
-					params.x = initialX + (int) (event.getRawX() - initialTouchX);
-					params.y = initialY + (int) (event.getRawY() - initialTouchY);
-					windowManager.updateViewLayout(expandedView, params);
+					windowManager.addView(minimizedView, params);						
 					return true;
 				}
 				return false;
@@ -92,6 +84,8 @@ public class GestureOverlayService extends Service {
 			private int initialY;
 			private float initialTouchX;
 			private float initialTouchY;
+			
+			private long downTime;
 
 			@Override public boolean onTouch(View v, MotionEvent event) {
 				switch (event.getAction()) {
@@ -100,10 +94,14 @@ public class GestureOverlayService extends Service {
 					initialY = params.y;
 					initialTouchX = event.getRawX();
 					initialTouchY = event.getRawY();
+					downTime = System.currentTimeMillis();
 					return true;
 				case MotionEvent.ACTION_UP:
-					windowManager.removeView(minimizedView);
-					windowManager.addView(expandedView, params);
+					long diff = System.currentTimeMillis() - downTime;
+					if (200 > diff) {
+						windowManager.removeView(minimizedView);
+						windowManager.addView(expandedView, params);
+					}
 					return true;
 				case MotionEvent.ACTION_MOVE:
 					params.x = initialX + (int) (event.getRawX() - initialTouchX);
@@ -115,7 +113,23 @@ public class GestureOverlayService extends Service {
 			}
 		});
 
-
+		Thread thread = new Thread(new Runnable(){
+		    @Override
+		    public void run() {
+		        try {
+					String host = MainActivity.ipAddress;//"192.168.4.103";//hard coded to Roland's computer
+					//TODO figure out how to find the host computer (otherwise run the server on the web or something)
+					int port = 8085;//HARDCODED...change later?
+		        	client = new Client(host, port);
+		        } catch (Exception e) {
+		            e.printStackTrace();
+		        }
+		    }
+		});
+		thread.start();
+		
+		gestureImageView = (GestureImageView) expandedView.findViewById(R.id.gestureImageView);
+		
 		params = new WindowManager.LayoutParams(
 				WindowManager.LayoutParams.WRAP_CONTENT,
 				WindowManager.LayoutParams.WRAP_CONTENT,
@@ -131,10 +145,15 @@ public class GestureOverlayService extends Service {
 		
 		windowManager.addView(minimizedView, params);
 	}
-
+	
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
+		if (client != null) {
+			try {
+				client.closeConnection();
+			} catch (Exception e) { }
+		}		
 		if (expandedView != null) {
 			try {
 				windowManager.removeView(expandedView);
