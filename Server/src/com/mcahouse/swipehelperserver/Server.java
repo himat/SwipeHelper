@@ -23,9 +23,8 @@ public class Server implements Runnable {
 	}
 	
 	private void listen(int port) throws IOException	{
-		ss = new ServerSocket(port);//TODO make it find it's own ports then generate code to put in phone to find it's own port
+		ss = new ServerSocket(port);
 		System.out.println("Listening on " + ss);
-		//do we need a loop if it's only one connection?
 		mainThread = new Thread(this);
 		Thread wait = new Thread()	{
 			public void run()	{

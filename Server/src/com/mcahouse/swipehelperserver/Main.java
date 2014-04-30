@@ -436,10 +436,15 @@ public class Main extends Container implements ActionListener, Runnable, KeyEven
 			}
 
 			if(command != null)	{
-				if(command.contains("UP"))	{
+				if(command.contains("TWO UP"))	{
 					altTabUp = false;
 					windows();//open up windows menu
-					
+				}
+				else if(command.contains("TWO DOWN"))	{
+					collapse();
+				}
+				else if(command.contains("UP"))	{
+					hitUpArrowKey();
 				}
 				else if(command.contains("DOWN"))	{
 					/*if(windowsMenuUp)	{
@@ -450,7 +455,7 @@ public class Main extends Container implements ActionListener, Runnable, KeyEven
 					else	{
 						collapse();//minimize all windows
 					}*/
-					collapse();
+					hitDownArrowKey();
 				}
 				else if(command.contains("RIGHT"))	{
 					
