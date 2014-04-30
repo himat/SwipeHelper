@@ -2,16 +2,12 @@ package com.mcahouse.swipehelper;
 
 import android.os.Bundle;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 public class MainActivity extends Activity {
 	public static String ipAddress; 
@@ -29,11 +25,8 @@ public class MainActivity extends Activity {
 				
 				EditText ipInput = (EditText) findViewById(R.id.ip_box);
 				ipAddress = ipInput.getText().toString();
-				Intent gestureActivity = new Intent(getApplicationContext(), GestureTestActivity.class);
 				Intent launchService = new Intent(getApplicationContext(), GestureOverlayService.class);
-				startService(launchService);
-				//startActivity(gestureActivity);
-				
+				startService(launchService);				
 			}
 			
 		});

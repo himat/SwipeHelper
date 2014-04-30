@@ -1,7 +1,5 @@
 package com.mcahouse.swipehelper;
 
-import android.graphics.PointF;
-import android.util.Log;
 import android.view.MotionEvent;
 
 public class GestureDeterminer {
@@ -11,7 +9,7 @@ public class GestureDeterminer {
 		float deltaY = e2.getRawY() - e1.getRawY();
 		
 		if (5 > Math.abs(deltaY) && 5 > Math.abs(deltaX)) {
-			return "TAP";
+			return "SINGLE TAP";
 		} else if (deltaX > 0 && Math.abs(deltaX) > Math.abs(deltaY)) {
 			return ("RIGHT: " + String.valueOf(deltaX));
 		} else if (deltaX < 0 && Math.abs(deltaX) > Math.abs(deltaY)) {

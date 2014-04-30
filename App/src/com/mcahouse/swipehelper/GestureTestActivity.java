@@ -152,7 +152,7 @@ public class GestureTestActivity extends Activity implements
 	
 	@Override
 	public void onStop(){
-	client.closeConnection();	client.closeConnection();
+	client.closeConnection();
 	}
 
 }

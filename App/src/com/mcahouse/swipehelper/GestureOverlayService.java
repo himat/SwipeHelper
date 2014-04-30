@@ -32,12 +32,7 @@ public class GestureOverlayService extends Service {
 	private ImageView expandedImageView;
 	private Button expandedCloseButton;
 	
-	private GestureImageView gestureImageView;
-	
-	private ArrayList<Integer> pointerTable = new ArrayList<Integer>();
-	private Hashtable<Integer, MotionEvent> downTable = new Hashtable<Integer, MotionEvent>();
-	private Hashtable<Integer, MotionEvent> upTable = new Hashtable<Integer, MotionEvent>();
-	
+	private ImageView gestureImageView;	
 	
 	public Client client;
 	
@@ -72,7 +67,7 @@ public class GestureOverlayService extends Service {
 		minimizedView = new ImageView(this);
 		minimizedView.setImageResource(R.drawable.ic_launcher);
 		
-		gestureImageView = (GestureImageView) expandedView.findViewById(R.id.gestureImageView);
+		gestureImageView = (ImageView) expandedView.findViewById(R.id.gestureImageView);
 		gestureImageView.setOnTouchListener(new TouchGestureListener());
 		
 		expandedCloseButton.setOnClickListener(new View.OnClickListener() {
@@ -83,13 +78,11 @@ public class GestureOverlayService extends Service {
 			}
 		});
 		
-		expandedImageView.setOnTouchListener(new View.OnTouchListener() {		
-			private long downTime;
+		expandedImageView.setOnTouchListener(new View.OnTouchListener() {
 
 			@Override public boolean onTouch(View v, MotionEvent event) {
 				switch (event.getAction()) {
 				case MotionEvent.ACTION_DOWN:
-					downTime = System.currentTimeMillis();
 					return true;
 				case MotionEvent.ACTION_UP:
 					windowManager.removeView(expandedView);
@@ -189,6 +182,10 @@ public class GestureOverlayService extends Service {
 	
 	private class TouchGestureListener implements OnTouchListener {
 
+		private ArrayList<Integer> pointerTable = new ArrayList<Integer>();
+		private Hashtable<Integer, MotionEvent> downTable = new Hashtable<Integer, MotionEvent>();
+		private Hashtable<Integer, MotionEvent> upTable = new Hashtable<Integer, MotionEvent>();
+		
 		@SuppressLint("Recycle")
 		@Override
 		public boolean onTouch(View v, MotionEvent event) {
