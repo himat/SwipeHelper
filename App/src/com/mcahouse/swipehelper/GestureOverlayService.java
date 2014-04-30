@@ -178,6 +178,7 @@ public class GestureOverlayService extends Service {
 	
 	private void updateText(String input) {
 		client.writeToPC(input);
+		Log.d("TAG", input);
 	}
 	
 	private class TouchGestureListener implements OnTouchListener {
@@ -185,6 +186,7 @@ public class GestureOverlayService extends Service {
 		private ArrayList<Integer> pointerTable = new ArrayList<Integer>();
 		private Hashtable<Integer, MotionEvent> downTable = new Hashtable<Integer, MotionEvent>();
 		private Hashtable<Integer, MotionEvent> upTable = new Hashtable<Integer, MotionEvent>();
+		private ArrayList <String> multiGestures = new ArrayList<String>();
 		
 		@SuppressLint("Recycle")
 		@Override
@@ -203,14 +205,25 @@ public class GestureOverlayService extends Service {
 		        case (MotionEvent.ACTION_POINTER_DOWN):
 		        	int currentPointerIdPointerDown = event.getPointerId(event.getActionIndex());
 		        
+		        	//Log.d("TAG", event.getX() + " " + event.getY());
+		        
 	            	pointerTable.add(currentPointerIdPointerDown);
 	            	downTable.put(currentPointerIdPointerDown, MotionEvent.obtain(event));
 	            	upTable.put(currentPointerIdPointerDown, MotionEvent.obtain(event));
 		            return true;
 		        case (MotionEvent.ACTION_MOVE):
-		        	int currentPointerIdMove = event.getPointerId(event.getActionIndex());
+		        	int currentPointerIdMove;
+		        	int pointerCount = event.getPointerCount();
+			        for(int i = 0; i < pointerCount; ++i)
+			        {
+			            currentPointerIdMove = pointerTable.get(i);
+			            //if (i > 0) Log.d("pointer id - move",Integer.toString(currentPointerIdMove));
+			            upTable.put(currentPointerIdMove, MotionEvent.obtain(event));
+			        }
+		        	/*int currentPointerIdMove = event.getPointerId(event.getActionIndex());
 		        	
-		        	upTable.put(currentPointerIdMove, MotionEvent.obtain(event));
+		        	
+		        	upTable.put(currentPointerIdMove, MotionEvent.obtain(event));*/
 		            return true;
 		        case (MotionEvent.ACTION_UP):
 		        	int currentPointerIdUp = event.getPointerId(event.getActionIndex());
@@ -218,20 +231,29 @@ public class GestureOverlayService extends Service {
 		        	MotionEvent initialU = downTable.get((Integer)currentPointerIdUp);
 		        	MotionEvent lastU = upTable.get((Integer)currentPointerIdUp);
 		        	
-		        	Log.d("TAG", GestureDeterminer.determineDirection(initialU, lastU));
-		        	updateText(GestureDeterminer.determineDirection(initialU, lastU));
+		        	multiGestures.add(GestureDeterminer.determineDirection(initialU, lastU, currentPointerIdUp));
+		        	
+		        	if (multiGestures.size() == 2) {
+		        		updateText(GestureDeterminer.determineMultiDirection(multiGestures.get(0), multiGestures.get(1)));
+		        	} else {
+		        		updateText(GestureDeterminer.determineDirection(initialU, lastU, currentPointerIdUp));
+		        	}        			        	
 		        
 		        	pointerTable.remove((Integer)currentPointerIdUp);
 		        	downTable.remove((Integer)currentPointerIdUp);
 		        	upTable.remove((Integer)currentPointerIdUp);
+		        	multiGestures.clear();
 		            return true;
 		        case (MotionEvent.ACTION_POINTER_UP):
-		        	int currentPointerIdPointerUp = event.getPointerId(event.getActionIndex());
+		        	int currentPointerIdPointerUp = event.getPointerId(event.getActionIndex());   
 		        	
 		        	MotionEvent initialPU = downTable.get((Integer)currentPointerIdPointerUp);
 		        	MotionEvent lastPU = upTable.get((Integer)currentPointerIdPointerUp);
 		        
-		        	Log.d("TAG", GestureDeterminer.determineDirection(initialPU, lastPU));
+		        	//Log.d("TAG", event.getX(currentPointerIdPointerUp) + " " + event.getY(currentPointerIdPointerUp));
+		        	//Log.d("TAG", GestureDeterminer.determineDirection(initialPU, lastPU, currentPointerIdPointerUp));
+		        	
+		        	multiGestures.add(GestureDeterminer.determineDirection(initialPU, lastPU, currentPointerIdPointerUp));
 		        
 	            	pointerTable.remove((Integer)currentPointerIdPointerUp);
 	            	downTable.remove((Integer)currentPointerIdPointerUp);
