@@ -23,6 +23,7 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				
+				
 				EditText ipInput = (EditText) findViewById(R.id.ip_box);
 				ipAddress = ipInput.getText().toString();
 				Intent launchService = new Intent(getApplicationContext(), GestureOverlayService.class);
