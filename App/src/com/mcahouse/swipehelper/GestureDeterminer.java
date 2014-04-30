@@ -39,6 +39,10 @@ public class GestureDeterminer {
 				return "TWO UP";
 			} else if (s1.contentEquals("DOWN")) {
 				return "TWO DOWN";
+			} else if (s1.contentEquals("RIGHT")) {
+				return "TWO RIGHT";
+			} else if (s1.contentEquals("LEFT")) {
+				return "TWO LEFT";
 			} else {
 				return "NONE";
 			}
